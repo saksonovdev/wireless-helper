@@ -65,6 +65,8 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
         val prefs = getSharedPreferences("WirelessHelperPrefs", Context.MODE_PRIVATE)
         val mode = prefs.getInt("connection_mode", 0)
         
+        currentStrategy?.stop()
+        
         currentStrategy = when (mode) {
             0 -> StrategySharedNetwork(this, serviceScope)
             1 -> StrategyHotspotPhone(this, serviceScope)
@@ -88,15 +90,12 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
 
     override fun onProxyDisconnected() {
         isConnected = false
-        Log.i(TAG, "Proxy disconnected. Job done, stopping service.")
-        updateNotification("Android Auto disconnected")
+        Log.i(TAG, "Proxy disconnected. Returning to searching state.")
+        updateNotification("Searching for Headunit...")
         
-        serviceScope.launch {
-            delay(3000)
-            if (isRunning) {
-                stopSelf()
-            }
-        }
+        // Restart the strategy to resume searching immediately
+        currentStrategy?.stop()
+        startSelectedStrategy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
