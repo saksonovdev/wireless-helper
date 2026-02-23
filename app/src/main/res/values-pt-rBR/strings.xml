@@ -16,7 +16,8 @@
     
     <string name="bt_device_label">Dispositivo Bluetooth</string>
     <string name="wifi_ssid_label">Rede Wi-Fi</string>
-    <string name="wifi_ssid_hint">Enter Wi-Fi SSID</string>
+    <string name="wifi_connected_network">Rede Wi-Fi Conectada</string>
+    <string name="wifi_ssid_hint">Digite o SSID do Wi-Fi</string>
     <string name="wifi_ssid_dialog_title">Inicio Automatico via Wi-Fi</string>
     <string name="wifi_ssid_dialog_msg">O serviço será iniciado automaticamente quando conectado a rede:</string>
     <string name="wifi_ssid_save">Salvar</string>
@@ -25,6 +26,9 @@
     <string name="wifi_background_location_title">Localização em Plano de Fundo Necessária</string>
     <string name="wifi_background_location_msg">Para detectar redes Wi-Fi mesmo com o aplicativo fechado, defina a permissão de localização como \'Permitir o Tempo Todo\' nas configurações do Android.</string>
     <string name="wifi_background_location_button">Configurações</string>
+
+    <string name="battery_opt_title">Otimização de Bateria detectada</string>
+    <string name="battery_opt_msg">Para permitir o início automático via Wi-Fi/Bluetooth, defina este aplicativo como \'Sem restrições\' nas configurações de bateria.</string>
     
     <string name="not_set">Nenhum Selecionado</string>
     
