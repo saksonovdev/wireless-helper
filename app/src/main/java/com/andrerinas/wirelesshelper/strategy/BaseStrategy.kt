@@ -36,6 +36,10 @@ abstract class BaseStrategy(protected val context: Context, private val scope: C
         return CoroutineScope(scope.coroutineContext + job)
     }
 
+    companion object {
+        const val ACTION_TRIGGER_INTENT = "com.andrerinas.wirelesshelper.ACTION_TRIGGER_INTENT"
+    }
+
     protected fun launchAndroidAuto(hostIp: String, forceFakeNetwork: Boolean = false) {
         if (isLaunching.get()) return
         if (!isLaunching.compareAndSet(false, true)) return
@@ -83,6 +87,15 @@ abstract class BaseStrategy(protected val context: Context, private val scope: C
                 }
 
                 Log.i(TAG, "Firing Proxy Intent. LocalPort=$localPort")
+                
+                // 1. Try via Broadcast (if TransparentTriggerActivity is active)
+                val broadcastIntent = Intent(ACTION_TRIGGER_INTENT).apply {
+                    putExtra("intent", intent)
+                    setPackage(context.packageName)
+                }
+                context.sendBroadcast(broadcastIntent)
+
+                // 2. Standard Start (Fallback for Widget/App usage)
                 context.startActivity(intent)
 
                 // The lock stays active until proxy confirms connection or timeout

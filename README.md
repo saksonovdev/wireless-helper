@@ -21,6 +21,11 @@ To ensure reliable background auto-start (Bluetooth/WiFi) and a stable connectio
 3. **Paired Devices:** Select your car's Bluetooth device in the settings.
 
 ## Changelog
+### v0.5.0
+- Added 1x1 Widget for Launcher
+- Added Quick-Settings-Tile
+- Changed Logo because of the new icons
+
 ### v.0.4.0
 - Added experimental Auto-Start on Wi-Fi logic
 - Fixed connection hangs and improved discovery logic.

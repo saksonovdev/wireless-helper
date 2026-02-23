@@ -64,6 +64,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isMyServiceRunning(): Boolean {
+        return WirelessHelperService.isRunning
+    }
+
     private val connectionModes by lazy {
         arrayOf(
             getString(R.string.mode_nsd),

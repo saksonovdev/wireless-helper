@@ -37,13 +37,9 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
 
     override fun onCreate() {
         super.onCreate()
-        isRunning = true
-        isConnected = false
         setupLocks()
         createNotificationChannel()
         startForeground(1, createNotification(getString(R.string.notif_searching)))
-        
-        startSelectedStrategy()
     }
 
     private fun setupLocks() {
@@ -86,17 +82,23 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
     override fun onProxyConnected() {
         isConnected = true
         updateNotification(getString(R.string.notif_connected))
+        WirelessHelperWidget.triggerUpdate(this)
+        WirelessHelperTileService.triggerUpdate(this)
     }
 
     override fun onProxyDisconnected() {
         isConnected = false
         Log.i(TAG, "Proxy disconnected. Stopping service.")
+        WirelessHelperWidget.triggerUpdate(this)
+        WirelessHelperTileService.triggerUpdate(this)
         stopSelf()
     }
 
     override fun onLaunchTimeout() {
         Log.i(TAG, "Launch timeout. Resuming discovery.")
         updateNotification(getString(R.string.notif_searching))
+        WirelessHelperWidget.triggerUpdate(this)
+        WirelessHelperTileService.triggerUpdate(this)
         
         // Restart the strategy to resume searching
         currentStrategy?.stop()
@@ -104,7 +106,21 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) stopSelf()
+        when (intent?.action) {
+            ACTION_STOP -> {
+                isRunning = false
+                WirelessHelperWidget.triggerUpdate(this)
+                WirelessHelperTileService.triggerUpdate(this)
+                stopSelf()
+            }
+            ACTION_START -> {
+                isRunning = true
+                isConnected = false
+                startSelectedStrategy()
+                WirelessHelperWidget.triggerUpdate(this)
+                WirelessHelperTileService.triggerUpdate(this)
+            }
+        }
         return START_STICKY
     }
 
@@ -120,6 +136,8 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
             if (wakeLock?.isHeld == true) wakeLock?.release()
         } catch (e: Exception) { }
         serviceJob.cancel()
+        WirelessHelperWidget.triggerUpdate(this)
+        WirelessHelperTileService.triggerUpdate(this)
         super.onDestroy()
     }
 
@@ -133,7 +151,7 @@ class WirelessHelperService : Service(), BaseStrategy.StateListener {
         val pendingStop = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE)
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name)).setContentText(content)
-            .setSmallIcon(android.R.drawable.ic_menu_compass).setOngoing(true)
+            .setSmallIcon(R.drawable.ic_wireless_helper).setOngoing(true)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.notif_stop), pendingStop)
             .build()
     }
