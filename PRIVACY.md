@@ -1,27 +1,45 @@
 # Privacy Policy for Wireless Helper
 
-Last updated: February 5, 2026
+Last updated: February 23, 2026
 
-This Privacy Policy describes how Wireless Helper ("we", "our", or "us") handles your data when you use our application.
+Wireless Helper ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains our practices regarding the collection, use, and disclosure of information through our mobile application.
 
-## 1. Data Collection and Usage
+## 1. Important Disclosure: Location Data Access
 
-**Wireless Helper does NOT collect, store, or share any personal user data.**
+**Wireless Helper requires access to your device's location data, including in the background, solely to enable the "Auto-start on Wi-Fi" feature.**
 
-The application functions solely as a trigger to launch the native Android Auto wireless setup on your phone. It does not track your location, your usage habits, or any other personal information.
+*   **Why we need it:** Android requires the "Fine Location" and "Background Location" permissions to allow an application to access the name of the connected Wi-Fi network (SSID). 
+*   **How we use it:** The app checks the SSID of the connected Wi-Fi network to determine if it matches the network you have selected for automatic triggering of Android Auto.
+*   **Storage and Sharing:** We **do not** collect, store, or transmit your location data to any server. All processing happens strictly locally on your device. We **do not** share your location data with any third parties.
+*   **User Choice:** Access to location is optional and only required if you choose to use the Wi-Fi auto-start feature.
 
-## 2. Permissions
+## 2. Information Collection and Use
 
-The app requests specific permissions solely to enable its core functionality:
+**We do not collect any personally identifiable information (PII).**
 
-* **Bluetooth:** Used to detect when your phone connects to your car's Bluetooth system to automatically start the wireless discovery process.
-* **Location:** Required by the Android system to detect nearby WiFi networks and SSIDs during the discovery phase. We do not use this to track your physical location.
-* **Notifications:** Used to show a foreground service notification while the app is actively searching for your headunit.
+Wireless Helper is a utility tool designed to act as a bridge/proxy for Android Auto. We do not track user behavior, usage habits, or personal identities.
 
-## 3. Third-Party Services
+## 3. Permissions
 
-Wireless Helper does not integrate any third-party analytics SDKs, advertising networks, or tracking tools.
+The application requests the following permissions to fulfill its purpose:
 
-## 4. Contact Us
+*   **Location (Fine/Background):** Used exclusively to identify the Wi-Fi network name (SSID) for automation triggers.
+*   **Bluetooth:** Used to detect connections to vehicle Bluetooth systems to trigger the service.
+*   **Notifications:** Used to display a required foreground service notification while the app is active.
+*   **Nearby Devices:** Used on newer Android versions to scan for Bluetooth triggers without requiring location data.
 
-If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us via our official channels.
+## 4. Data Security
+
+Since we do not collect or store any data, there is no risk of data breaches from our side. The communication between your phone and the headunit is a direct local connection.
+
+## 5. Third-Party Services
+
+The app does not use any third-party analytics, advertising, or tracking SDKs.
+
+## 6. Changes to This Policy
+
+We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.
+
+## 7. Contact Us
+
+If you have any questions about this Privacy Policy, please contact us at our official support channels.
