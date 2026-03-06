@@ -10,7 +10,9 @@ import android.net.nsd.NsdServiceInfo
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy(context, scope) {
 
@@ -23,6 +25,7 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
     private var p2pChannel: WifiP2pManager.Channel? = null
     private var p2pReceiver: BroadcastReceiver? = null
     private var targetDeviceName: String? = null
+    private var isConnectingToPeer = false
 
     override fun start() {
         val prefs = context.getSharedPreferences("WirelessHelperPrefs", Context.MODE_PRIVATE)
@@ -50,9 +53,14 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
                     WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION -> {
                         p2pManager.requestPeers(p2pChannel) { peers ->
                             val target = targetDeviceName ?: return@requestPeers
-                            val device = peers.deviceList.find { it.deviceName.contains(target, ignoreCase = true) }
-                            if (device != null && device.status == WifiP2pDevice.AVAILABLE) {
-                                connectToPeer(device)
+                            Log.d(TAG, "P2P Peers found: ${peers.deviceList.size}")
+                            for (device in peers.deviceList) {
+                                Log.d(TAG, "  - Found: ${device.deviceName} (${device.deviceAddress}) Status: ${device.status}")
+                            }
+
+                            val match = peers.deviceList.find { it.deviceName.contains(target, ignoreCase = true) }
+                            if (match != null && match.status == WifiP2pDevice.AVAILABLE && !isConnectingToPeer) {
+                                connectToPeer(match)
                             }
                         }
                     }
@@ -63,9 +71,13 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
                                 if (info.groupFormed) {
                                     val host = info.groupOwnerAddress.hostAddress
                                     Log.i(TAG, "WiFi Direct connected. Group Owner: $host")
-                                    launchAndroidAuto(host, forceFakeNetwork = false)
+                                    isConnectingToPeer = false
+                                    // FORCE FAKE NETWORK 0 for correct P2P routing
+                                    launchAndroidAuto(host, forceFakeNetwork = true)
                                 }
                             }
+                        } else {
+                            isConnectingToPeer = false
                         }
                     }
                     WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION -> {
@@ -82,10 +94,25 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
 
         context.registerReceiver(p2pReceiver, intentFilter)
         
-        // Start discovering peers
-        p2pManager.discoverPeers(p2pChannel, object : WifiP2pManager.ActionListener {
+        getStrategyScope().launch {
+            delay(1000)
+            discoverPeersWithRetry()
+        }
+    }
+
+    private fun discoverPeersWithRetry() {
+        p2pManager?.stopPeerDiscovery(p2pChannel, null)
+        p2pManager?.removeGroup(p2pChannel, null)
+
+        p2pManager?.discoverPeers(p2pChannel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() { Log.d(TAG, "P2P Peer Discovery Started") }
-            override fun onFailure(reason: Int) { Log.e(TAG, "P2P Peer Discovery Failed: $reason") }
+            override fun onFailure(reason: Int) { 
+                Log.e(TAG, "P2P Peer Discovery Failed: $reason. Retrying in 5s...")
+                getStrategyScope().launch {
+                    delay(5000)
+                    if (p2pChannel != null) discoverPeersWithRetry()
+                }
+            }
         })
     }
 
@@ -94,10 +121,14 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
             deviceAddress = device.deviceAddress
         }
         
+        isConnectingToPeer = true
         Log.i(TAG, "Attempting to connect to P2P device: ${device.deviceName}")
         p2pManager?.connect(p2pChannel, config, object : WifiP2pManager.ActionListener {
             override fun onSuccess() { Log.d(TAG, "P2P Connect initiated") }
-            override fun onFailure(reason: Int) { Log.e(TAG, "P2P Connect failed: $reason") }
+            override fun onFailure(reason: Int) { 
+                Log.e(TAG, "P2P Connect failed: $reason")
+                isConnectingToPeer = false
+            }
         })
     }
 
@@ -137,5 +168,6 @@ class StrategyWifiDirect(context: Context, scope: CoroutineScope) : BaseStrategy
         
         p2pManager?.stopPeerDiscovery(p2pChannel, null)
         p2pChannel = null
+        isConnectingToPeer = false
     }
 }

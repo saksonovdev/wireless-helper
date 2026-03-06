@@ -3,7 +3,6 @@ package com.andrerinas.wirelesshelper
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,7 +23,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.andrerinas.wirelesshelper.WifiJobService
 
 class MainActivity : AppCompatActivity() {
 
@@ -99,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_WirelessHelper)
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
+        
         setContentView(R.layout.activity_main)
 
         initializeViews()
@@ -106,16 +105,12 @@ class MainActivity : AppCompatActivity() {
         restoreState()
         handleIntent(intent)
 
-        val scrollView = findViewById<View>(R.id.main_root).findViewWithTag<View>("scroll_view") ?: findViewById(R.id.main_root)
-        // Note: I'll use the root but ensure the ScrollView gets the padding if possible.
-        // Let's stick to the root for simplicity as it has the background.
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Apply bottom padding for navigation bar and top for status bar
-            // We add the status bar height to the existing design padding
-            v.setPadding(v.paddingLeft, systemBars.top, v.paddingRight, systemBars.bottom)
-            insets
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root)) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(v.paddingLeft, systemBars.top, v.paddingRight, systemBars.bottom)
+                insets
+            }
         }
     }
 
@@ -434,10 +429,11 @@ class MainActivity : AppCompatActivity() {
     private fun checkPermissionsAndStart() {
         val permissions = mutableListOf<String>()
         if (Build.VERSION.SDK_INT >= 33) {
-            permissions.add("android.permission.POST_NOTIFICATIONS")
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+            permissions.add(android.Manifest.permission.NEARBY_WIFI_DEVICES)
         }
         if (Build.VERSION.SDK_INT >= 31) {
-            permissions.add("android.permission.BLUETOOTH_CONNECT")
+            permissions.add(android.Manifest.permission.BLUETOOTH_CONNECT)
         }
         
         // Needed for WiFi SSID access
