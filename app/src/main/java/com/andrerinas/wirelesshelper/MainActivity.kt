@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity() {
         layoutAbout.setOnClickListener {
             MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
                 .setTitle(R.string.about)
+                // .setMessage("Wireless Helper is a trigger app for Headunit Revived.\n\nDeveloped by André Rinas\n© 2026")
                 .setMessage(getString(R.string.about_dialog_body))
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
